@@ -36,8 +36,23 @@
       transition: background 0.5s, color 0.5s;
     }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; position: relative; }
-    .section-page { width: 100%; display: none; padding: 100px 0; min-height: 100vh; box-sizing: border-box; }
-    .section-page.active { display: block; }
+    .section-page { 
+      width: 100%; 
+      display: none; 
+      padding: 80px 0; 
+      min-height: 100vh; 
+      box-sizing: border-box; 
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .section-page.active { display: flex; }
+    .section-page .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
     #home { height: 100vh; overflow: hidden !important; padding: 0; display: none; align-items: center; justify-content: center; }
     #home.active { display: flex; }
 
@@ -52,7 +67,14 @@
     .hero-name { font-size: 4rem; font-weight: 900; margin: 0; background: linear-gradient(to bottom, #ffffff 40%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: pre-wrap; line-height: 1.1; }
     body.light-mode .hero-name { background: linear-gradient(to bottom, var(--text-color) 40%, var(--primary) 100%); -webkit-background-clip: text; }
 
-    .section-header-pro { text-align: center; margin-bottom: 5rem; }
+    .section-header-pro { 
+      text-align: center; 
+      margin-bottom: 3rem; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
     .section-header-pro .label { font-size: 1.2rem; font-weight: 800; color: var(--primary); letter-spacing: 4px; opacity: 0.6; text-transform: uppercase; }
     .section-header-pro h2 { 
       font-size: 3.5rem; font-weight: 900; margin: 0.5rem 0; position: relative; display: inline-block; padding-bottom: 0.5rem; 
@@ -207,15 +229,15 @@
 
   <section id="experience" class="section-page">
     <div class="container">
-      <div class="section-header-pro"><span class="label">01</span><br><h2>Experience<div class="line"></div></h2></div>
-      <div id="expTabs" style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;"></div>
-      <div id="projectsGrid"></div>
+      <div class="section-header-pro" style="margin-bottom:2rem;"><span class="label">01</span><h2>Experience</h2><div class="line"></div></div>
+      <div id="expTabs" style="display:flex; justify-content:center; flex-wrap:wrap; gap:1.2rem; margin-bottom:3.5rem;"></div>
+      <div id="projectsGrid" style="display:flex; flex-direction:column; align-items:center; width:100%; gap:2rem;"></div>
     </div>
   </section>
 
   <section id="selfdev" class="section-page">
     <div class="container">
-      <div class="section-header-pro"><span class="label">02</span><br><h2>Skills & Development<div class="line"></div></h2></div>
+      <div class="section-header-pro"><span class="label">02</span><h2>Skills & Development</h2><div class="line"></div></div>
       <div id="certsGrid"></div>
       <div id="workshopsGrid" style="margin-top:2rem;"></div>
     </div>
@@ -223,14 +245,14 @@
 
   <section id="awards" class="section-page">
     <div class="container">
-      <div class="section-header-pro"><span class="label">03</span><br><h2>Awards<div class="line"></div></h2></div>
+      <div class="section-header-pro"><span class="label">03</span><h2>Awards</h2><div class="line"></div></div>
       <div id="competitionsGrid"></div>
     </div>
   </section>
 
   <section id="leadership" class="section-page">
     <div class="container">
-      <div class="section-header-pro"><span class="label">04</span><br><h2>Leadership<div class="line"></div></h2></div>
+      <div class="section-header-pro"><span class="label">04</span><h2>Leadership</h2><div class="line"></div></div>
       <div id="leadershipGrid"></div>
     </div>
   </section>
@@ -418,16 +440,17 @@
       const tabList = [['production','🏢 Production'],['competition','🏅 Competition'],['academic','🎓 Academic'],['personal','💡 Personal'],['opensource','🔓 Open Source']];
       document.getElementById('expTabs').innerHTML = tabList.map(([k,l])=>`
         <button onclick="currentTab='${k}';renderAll()" style="
-          padding:0.7rem 1.5rem; 
+          padding:0.8rem 1.8rem; 
           border-radius:100px; 
-          border:none; 
-          background:${currentTab===k?'var(--primary)':(document.body.classList.contains('light-mode')?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.08)')}; 
-          color:${currentTab===k?'#fff':'var(--text-color)'}; 
-          opacity:${currentTab===k?'1':'0.8'};
+          border:1px solid ${currentTab===k?'var(--primary)':'rgba(255,255,255,0.1)'}; 
+          background:${currentTab===k?'var(--primary)':'rgba(255,255,255,0.05)'}; 
+          color:${currentTab===k?'#fff':'rgba(255,255,255,0.7)'}; 
+          backdrop-filter:blur(10px);
           cursor:pointer; 
           font-weight:700; 
-          transition:0.3s; 
-          ${currentTab===k?'box-shadow:0 10px 20px rgba(139, 92, 246, 0.3);':''}
+          font-size:0.85rem;
+          transition:0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+          ${currentTab===k?'box-shadow:0 10px 25px rgba(139, 92, 246, 0.5), 0 0 15px rgba(139, 92, 246, 0.3); transform:scale(1.05);':'opacity:0.8;'}
         ">${l}</button>`).join('');
       
       const projects = (data.experience && data.experience[currentTab]) || [];
