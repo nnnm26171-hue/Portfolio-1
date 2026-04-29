@@ -15,21 +15,44 @@
       --card-bg: rgba(10, 10, 20, 0.85);
       --card-border: rgba(139, 92, 246, 0.3);
       --accent-glow: rgba(139, 92, 246, 0.2);
+      --secondary-glow: rgba(34, 211, 238, 0.05);
+      --pink-glow: rgba(236, 72, 153, 0.05);
+      --amber-glow: rgba(245, 158, 11, 0.05);
+      --rose-glow: rgba(225, 29, 72, 0.05);
+      --lime-glow: rgba(132, 204, 22, 0.05);
+      --tab-inactive-bg: rgba(255, 255, 255, 0.05);
+      --tab-inactive-text: rgba(255, 255, 255, 0.7);
+      --tab-inactive-border: rgba(255, 255, 255, 0.1);
     }
     body.light-mode {
-      --bg-color: #f8fafc;
-      --text-color: #1e293b;
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --card-border: rgba(139, 92, 246, 0.1);
-      --accent-glow: rgba(139, 92, 246, 0.05);
+      --bg-color: #f1f5f9;
+      --text-color: #000000;
+      --primary: #312e81;
+      --cyan: #0e7490;
+      --card-bg: #ffffff;
+      --card-border: rgba(49, 46, 129, 0.3);
+      --accent-glow: rgba(124, 58, 237, 0.3);
+      --secondary-glow: rgba(14, 165, 233, 0.3);
+      --pink-glow: rgba(236, 72, 153, 0.25);
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --rose-glow: rgba(225, 29, 72, 0.2);
+      --lime-glow: rgba(132, 204, 22, 0.2);
+      --tab-inactive-bg: rgba(0, 0, 0, 0.08);
+      --tab-inactive-text: #1e1b4b;
+      --tab-inactive-border: rgba(0, 0, 0, 0.2);
     }
     body {
       margin: 0; padding: 0; width: 100%; min-height: 100%;
       background-color: var(--bg-color);
       overflow-x: hidden;
       background-image: 
-      radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 5% 15%, var(--accent-glow) 0%, transparent 45%),
+        radial-gradient(circle at 95% 20%, var(--secondary-glow) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, var(--pink-glow) 0%, transparent 50%),
+        radial-gradient(circle at 15% 80%, var(--amber-glow) 0%, transparent 50%),
+        radial-gradient(circle at 50% 10%, var(--rose-glow) 0%, transparent 40%),
+        radial-gradient(circle at 40% 90%, var(--lime-glow) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(192, 38, 211, 0.05) 0%, transparent 60%);
       background-attachment: fixed;
       color: var(--text-color);
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -75,13 +98,14 @@
       align-items: center;
       gap: 0.2rem;
     }
-    .section-header-pro .label { font-size: 1.2rem; font-weight: 800; color: var(--primary); letter-spacing: 4px; opacity: 0.6; text-transform: uppercase; }
+    .section-header-pro .label { font-size: 1.2rem; font-weight: 800; color: var(--primary); letter-spacing: 4px; opacity: 1; text-transform: uppercase; }
+    body.light-mode .section-header-pro .label { color: #1e1b4b; } /* Indigo 950 for labels */
     .section-header-pro h2 { 
       font-size: 3.5rem; font-weight: 900; margin: 0.5rem 0; position: relative; display: inline-block; padding-bottom: 0.5rem; 
       background: linear-gradient(135deg, #ffffff, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
     }
     body.light-mode .section-header-pro h2 { 
-      background: linear-gradient(135deg, var(--primary), #f43f5e); 
+      background: linear-gradient(135deg, #4f46e5, #c026d3); 
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -139,7 +163,12 @@
     .edge-left { left: 0; background: var(--primary); box-shadow: 0 0 30px 10px var(--primary); }
     .edge-right { right: 0; background: var(--cyan); box-shadow: 0 0 30px 10px var(--cyan); }
     
-    body.light-mode .edge-glow { display: none; }
+    body.light-mode .edge-glow, 
+    body.light-mode .glass-orb, 
+    body.light-mode .star-ultra, 
+    body.light-mode .twinkle { 
+      display: none !important; 
+    }
 
     .glass-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; opacity: 0.4; animation: orb-float 20s infinite alternate; }
     @keyframes orb-float { from { transform: translate(0,0); } to { transform: translate(100px, 100px); } }
@@ -442,9 +471,9 @@
         <button onclick="currentTab='${k}';renderAll()" style="
           padding:0.8rem 1.8rem; 
           border-radius:100px; 
-          border:1px solid ${currentTab===k?'var(--primary)':'rgba(255,255,255,0.1)'}; 
-          background:${currentTab===k?'var(--primary)':'rgba(255,255,255,0.05)'}; 
-          color:${currentTab===k?'#fff':'rgba(255,255,255,0.7)'}; 
+          border:1px solid ${currentTab===k?'var(--primary)':'var(--tab-inactive-border)'}; 
+          background:${currentTab===k?'var(--primary)':'var(--tab-inactive-bg)'}; 
+          color:${currentTab===k?'#fff':'var(--tab-inactive-text)'}; 
           backdrop-filter:blur(10px);
           cursor:pointer; 
           font-weight:700; 
