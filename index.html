@@ -96,11 +96,15 @@
       if (!sky) return;
       const isLight = document.body.classList.contains('light-mode');
       sky.innerHTML = '';
-      if (isLight) {
-        // Light mode background is handled cleanly and efficiently by CSS radial-gradients on the body
-        return;
-      } else {
-        for(let i=0; i<80; i++) {
+      
+      // Render 3 deep drifting cosmic nebulae in both dark and light modes for maximum colorful aesthetics
+      const n1 = document.createElement('div'); n1.className = 'cosmic-nebula nebula-purple'; sky.appendChild(n1);
+      const n2 = document.createElement('div'); n2.className = 'cosmic-nebula nebula-cyan'; sky.appendChild(n2);
+      const n3 = document.createElement('div'); n3.className = 'cosmic-nebula nebula-pink'; sky.appendChild(n3);
+
+      if (!isLight) {
+        // Twinkling stars starry night is exclusive to Dark Mode
+        for(let i=0; i<45; i++) { // Optimized star count to 45 for ultimate CPU performance
           const s = document.createElement('div'); s.className = 'twinkle';
           s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
           s.style.width = s.style.height = (Math.random()*2+1)+'px';
@@ -121,7 +125,7 @@
       s.style.setProperty('--dur', (Math.random()*2+2) + 's');
       sky.appendChild(s); setTimeout(() => s.remove(), 4000);
     }
-    setInterval(createShootingStar, 2000);
+    setInterval(createShootingStar, 4000); // Optimized to 4 seconds interval to prevent browser paint stress
 
     const SUPABASE_URL = 'https://odyrnnzcixwnpcirtaad.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BFWtCpz_nUWiixMnbjGObQ_ApM9I20l';
@@ -251,63 +255,77 @@
     }
 
     async function loadData() {
-      // 1. Try to load from localStorage first
+      // 1. Instantly load from localStorage first for 0ms load speed!
+      let hasRendered = false;
       try {
         const localData = localStorage.getItem('portfolio');
         if (localData) {
           const parsed = JSON.parse(localData);
           if (isValidData(parsed)) {
             data = normalizeData(parsed);
+            renderAll();
+            hasRendered = true;
           }
         }
       } catch (e) {
-        console.error("Local storage load failed:", e);
+        console.error("Local storage fast-load failed:", e);
       }
 
-      // 2. Try to load from local data.json file (works on web servers / GitHub Pages)
-      try {
-        const response = await fetch('data.json');
-        if (response.ok) {
-          const localJson = await response.json();
-          if (isValidData(localJson)) {
-            data = normalizeData(localJson);
+      // 2. If no localStorage, fetch static data.json instantly as the second fastest option
+      if (!hasRendered) {
+        try {
+          const response = await fetch('data.json');
+          if (response.ok) {
+            const localJson = await response.json();
+            if (isValidData(localJson)) {
+              data = normalizeData(localJson);
+              renderAll();
+              hasRendered = true;
+            }
           }
+        } catch (e) {
+          console.warn("Fast data.json load failed:", e);
         }
-      } catch (e) {
-        console.warn("Local data.json fetch skipped or failed (common in offline file:// mode):", e);
       }
 
-      // 3. Try to load from Supabase
-      try {
-        if(db) {
-          const {data:dbData, error} = await db.from('Portfolio_data').select('content').eq('id','main_portfolio').single();
-          if(dbData && dbData.content && isValidData(dbData.content)) {
-            data = normalizeData(dbData.content);
-          } else if (error) {
-            console.warn("Supabase fetch failed/empty, using fallback data:", error.message);
+      // 3. In the background (without blocking page load), fetch latest data from Supabase Cloud
+      // to automatically update and synchronize changes without lag!
+      setTimeout(async () => {
+        try {
+          if (db) {
+            const { data: dbData, error } = await db.from('Portfolio_data').select('content').eq('id', 'main_portfolio').single();
+            if (dbData && dbData.content && isValidData(dbData.content)) {
+              const freshData = normalizeData(dbData.content);
+              // Compare if changed to avoid unnecessary re-rendering
+              const currentString = JSON.stringify(data);
+              const freshString = JSON.stringify(freshData);
+              if (currentString !== freshString) {
+                data = freshData;
+                localStorage.setItem('portfolio', JSON.stringify(data));
+                renderAll();
+              }
+            }
           }
+        } catch (e) {
+          console.error("Background Supabase sync failed:", e);
         }
-      } catch(e) {
-        console.error("Supabase connection failed:", e);
-      }
-      
-      renderAll();
+      }, 50); // Small timeout to ensure initial paint completes instantly
     }
 
     async function saveData() {
-      // 1. Always save to localStorage immediately so changes are never lost in this browser
+      // 1. Save to localStorage immediately so changes are never lost in this browser
       try {
         localStorage.setItem('portfolio', JSON.stringify(data));
       } catch(e) {
         console.error("Failed to save to localStorage:", e);
       }
 
-      // 2. Try to sync to Supabase
+      // 2. Try to sync to Supabase (using upsert to ensure it handles inserts/updates perfectly)
       let cloudSaved = false;
       try {
-        if(db) {
-          const { error } = await db.from('Portfolio_data').update({ content: data }).eq('id', 'main_portfolio');
-          if(!error) {
+        if (db) {
+          const { error } = await db.from('Portfolio_data').upsert({ id: 'main_portfolio', content: data });
+          if (!error) {
             cloudSaved = true;
           } else {
             console.warn("Supabase save error:", error);
@@ -360,27 +378,7 @@
     }
     document.getElementById('adminPass').onkeypress = (e) => { if(e.key==='Enter') checkAdminPass(); };
     
-    // Robust Admin Triggers
-    let clickCount = 0, clickTimer;
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('.hero-avatar-wrapper') || e.target.closest('.hero-name')) {
-        clickCount++;
-        clearTimeout(clickTimer);
-        if (clickCount >= 3) { clickCount = 0; openModal(); } 
-        else { clickTimer = setTimeout(() => { clickCount = 0; }, 1500); }
-      }
-    });
-
-    let zeroCount = 0, zeroTimer;
-    document.addEventListener('keydown', (e) => { 
-      if(e.key === '0'){ 
-        clearTimeout(zeroTimer);
-        zeroCount++; 
-        if(zeroCount === 3){ openModal(); zeroCount = 0; } 
-        else { zeroTimer = setTimeout(() => zeroCount = 0, 1500); }
-      } 
-      if(e.shiftKey && e.key.toLowerCase() === 'a') { openModal(); }
-    });
+    // Admin access is exclusively triggered by clicking the 'CSS' skill tag.
 
     function updateText(path, val) {
       const parts = path.split('.');
@@ -425,10 +423,10 @@
                 style="background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:#fff; padding:0.6rem; border-radius:8px; width:100%; box-sizing:border-box; margin-bottom:0.5rem;" 
                 onchange="data.personal.email=this.value"
               >
-              <a href="mailto:${p.email || ''}" class="email-cta" style="margin-top:0.5rem; font-size:0.9rem; padding:0.6rem 1.5rem;">Contact Me (Preview)</a>
+              <a href="mailto:${p.email || ''}" class="hero-link email-cta" style="margin-top:0.5rem; font-size:0.9rem; padding:0.6rem 1.5rem;">Contact Me (Preview)</a>
             </div>`;
         } else {
-          emailEl.innerHTML = `<a href="mailto:${p.email || ''}" class="email-cta">Contact Me</a>`;
+          emailEl.innerHTML = `<a href="mailto:${p.email || ''}" class="hero-link email-cta">Contact Me</a>`;
         }
       }
       
@@ -451,23 +449,18 @@
         }
       }
       
-      document.getElementById('heroSkills').innerHTML = (p.skills||[]).map((s,i) => `<span class="skill-tag" ${edit} onblur="data.personal.skills[${i}]=this.innerText">${esc(s)}</span>`).join('') + (editMode?`<button class="skill-tag" onclick="data.personal.skills.push('New Skill');renderAll()">+</button>`:'');
+      document.getElementById('heroSkills').innerHTML = (p.skills||[]).map((s,i) => {
+        const isCSS = s.trim().toUpperCase() === 'CSS';
+        const adminClick = (!editMode && isCSS) ? 'onclick="openModal()"' : '';
+        const adminStyle = (!editMode && isCSS) ? 'style="cursor: pointer;" title="Admin Access"' : '';
+        return `<span class="skill-tag" ${adminClick} ${adminStyle} ${edit} onblur="data.personal.skills[${i}]=this.innerText">${esc(s)}</span>`;
+      }).join('') + (editMode?`<button class="skill-tag" onclick="data.personal.skills.push('New Skill');renderAll()">+</button>`:'');
       
       const tabList = [['production','🏢 Production'],['competition','🏅 Competition'],['academic','🎓 Academic'],['personal','💡 Personal'],['opensource','🔓 Open Source']];
       document.getElementById('expTabs').innerHTML = tabList.map(([k,l])=>`
-        <button onclick="currentTab='${k}';renderAll()" style="
-          padding:0.8rem 1.8rem; 
-          border-radius:100px; 
-          border:1px solid ${currentTab===k?'var(--primary)':'var(--tab-inactive-border)'}; 
-          background:${currentTab===k?'var(--primary)':'var(--tab-inactive-bg)'}; 
-          color:${currentTab===k?'#fff':'var(--tab-inactive-text)'}; 
-          backdrop-filter:blur(10px);
-          cursor:pointer; 
-          font-weight:700; 
-          font-size:0.85rem;
-          transition:0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-          ${currentTab===k?'box-shadow:0 10px 25px rgba(139, 92, 246, 0.5), 0 0 15px rgba(139, 92, 246, 0.3); transform:scale(1.05);':'opacity:0.8;'}
-        ">${l}</button>`).join('');
+        <button onclick="currentTab='${k}';renderAll()" class="exp-tab-btn ${currentTab===k?'active':''}">
+          ${l}
+        </button>`).join('');
       
       const projects = (data.experience && data.experience[currentTab]) || [];
       document.getElementById('projectsGrid').innerHTML = projects.map((proj,i) => `
