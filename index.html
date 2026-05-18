@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>My Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="">
   <div class="edge-glow edge-left"></div>
   <div class="edge-glow edge-right"></div>
-  <div id="adminModal">
+  <div id="adminModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom:1.5rem;">🔒 Admin Access</h3>
       <input type="password" id="adminPass" class="modal-input" placeholder="Password">
@@ -39,7 +39,7 @@
     <div class="container">
       <div class="hero-card-premium">
         <div class="hero-avatar-wrapper">
-          <div id="heroAvatarContainer"></div>
+          <div id="heroAvatarContainer" style="width:100%; height:100%;"></div>
         </div>
         <div>
           <p id="heroTitle" style="color:var(--primary); font-weight:800; letter-spacing:2px; margin-bottom:0.5rem;"></p>
@@ -84,7 +84,7 @@
     </div>
   </section>
 
-  <div class="edit-bar" id="editBar">
+  <div class="edit-bar" id="editBar" style="display: none;">
     <button class="modal-btn" style="background:#22c55e;" onclick="saveData()">💾 Save All Changes</button>
     <button class="modal-btn" style="background:#3b82f6;" onclick="downloadBackup()">📥 Download Backup</button>
     <button class="modal-btn" style="background:#ff4444;" onclick="exitEditMode()">🔒 Close</button>
@@ -97,14 +97,8 @@
       const isLight = document.body.classList.contains('light-mode');
       sky.innerHTML = '';
       if (isLight) {
-        for(let i=0; i<10; i++) {
-          const o = document.createElement('div'); o.className = 'glass-orb';
-          o.style.left = Math.random()*100+'%'; o.style.top = Math.random()*100+'%';
-          o.style.width = o.style.height = (Math.random()*300+200)+'px';
-          o.style.background = i % 2 === 0 ? 'var(--primary)' : '#f43f5e';
-          o.style.animationDelay = (Math.random()*5)+'s';
-          sky.appendChild(o);
-        }
+        // Light mode background is handled cleanly and efficiently by CSS radial-gradients on the body
+        return;
       } else {
         for(let i=0; i<80; i++) {
           const s = document.createElement('div'); s.className = 'twinkle';
@@ -121,7 +115,8 @@
       if (document.body.classList.contains('light-mode')) return;
       const s = document.createElement('div');
       s.className = 'star-ultra';
-      s.style.top = Math.random()*70 + '%'; s.style.left = '100%';
+      s.style.top = Math.random()*70 + '%';
+      s.style.left = '100%';
       s.style.width = (Math.random()*150+100) + 'px';
       s.style.setProperty('--dur', (Math.random()*2+2) + 's');
       sky.appendChild(s); setTimeout(() => s.remove(), 4000);
@@ -173,7 +168,8 @@
                     "img": ""
                 }
             ],
-            "competition": [
+            "competition": [],
+            "academic": [
                 {
                     "id": "0tsn6ft",
                     "name": "Chiang Mai University",
@@ -193,7 +189,6 @@
                     "description": ""
                 }
             ],
-            "academic": [],
             "personal": [],
             "opensource": []
         },
@@ -216,7 +211,7 @@
     };
 
     let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-    let currentTab = 'production', editMode = false;
+    let currentTab = 'academic', editMode = false;
 
     function normalizeData(loadedData) {
       if (!loadedData) return JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -245,12 +240,25 @@
       return loadedData;
     }
 
+    function isValidData(loadedData) {
+      if (!loadedData) return false;
+      if (!loadedData.personal || !loadedData.personal.name) return false;
+      const name = loadedData.personal.name.trim();
+      if (name === '' || name === 'ชื่อ-นามสกุล' || name === 'ชื่อ-นามสกุลของคุณ' || name === 'Name') {
+        return false;
+      }
+      return true;
+    }
+
     async function loadData() {
       // 1. Try to load from localStorage first
       try {
         const localData = localStorage.getItem('portfolio');
         if (localData) {
-          data = normalizeData(JSON.parse(localData));
+          const parsed = JSON.parse(localData);
+          if (isValidData(parsed)) {
+            data = normalizeData(parsed);
+          }
         }
       } catch (e) {
         console.error("Local storage load failed:", e);
@@ -261,7 +269,7 @@
         const response = await fetch('data.json');
         if (response.ok) {
           const localJson = await response.json();
-          if (localJson && localJson.personal && (localJson.personal.name || (localJson.personal.contact && localJson.personal.contact.email))) {
+          if (isValidData(localJson)) {
             data = normalizeData(localJson);
           }
         }
@@ -273,7 +281,7 @@
       try {
         if(db) {
           const {data:dbData, error} = await db.from('Portfolio_data').select('content').eq('id','main_portfolio').single();
-          if(dbData && dbData.content) {
+          if(dbData && dbData.content && isValidData(dbData.content)) {
             data = normalizeData(dbData.content);
           } else if (error) {
             console.warn("Supabase fetch failed/empty, using fallback data:", error.message);
