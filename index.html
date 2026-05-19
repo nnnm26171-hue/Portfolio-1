@@ -475,10 +475,11 @@
         </button>`).join('');
       
       const projects = (data.experience && data.experience[currentTab]) || [];
+      const imgClass = currentTab === 'academic' ? 'project-img-academic' : 'project-img-document';
       document.getElementById('projectsGrid').innerHTML = projects.map((proj,i) => `
         <div class="project-card">
           ${editMode?`<button class="del-btn" onclick="data.experience['${currentTab}'].splice(${i},1);renderAll()">×</button>`:''}
-          <img class="project-img-circle" src="${proj.img}" ${editMode?`onclick="changeImg('experience.${currentTab}.${i}.img')"`:''}>
+          ${proj.img ? `<img class="${imgClass}" src="${proj.img}" ${editMode?`onclick="changeImg('experience.${currentTab}.${i}.img')"`:''}>` : (editMode ? `<div class="${imgClass}" onclick="changeImg('experience.${currentTab}.${i}.img')" style="display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,0.05); border:2px dashed rgba(255,255,255,0.2); font-weight:800; font-size:1.1rem; color:#fff;">➕ Add Image</div>` : '')}
           <div class="project-content">
             <h3 ${edit} onblur="data.experience['${currentTab}'][${i}].name=this.innerText">${esc(proj.name)}</h3>
             <div ${edit} onblur="data.experience['${currentTab}'][${i}].year=this.innerText" style="opacity:0.6; margin:0.5rem 0;">${esc(proj.year)}</div>
