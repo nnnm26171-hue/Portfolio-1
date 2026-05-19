@@ -29,7 +29,6 @@
       <a href="#home" class="active" onclick="showSection('home'); return false;">Home</a>
       <a href="#experience" onclick="showSection('experience'); return false;">Experience</a>
       <a href="#selfdev" onclick="showSection('selfdev'); return false;">Skills</a>
-      <a href="#awards" onclick="showSection('awards'); return false;">Awards</a>
       <a href="#leadership" onclick="showSection('leadership'); return false;">Leadership</a>
     </div>
     <button onclick="toggleTheme()" style="background:none; border:none; color:#fff; cursor:pointer; margin-left:1rem; font-size:1.2rem;">🌓</button>
@@ -70,16 +69,9 @@
     </div>
   </section>
 
-  <section id="awards" class="section-page">
-    <div class="container">
-      <div class="section-header-pro"><span class="label">03</span><h2>Awards</h2><div class="line"></div></div>
-      <div id="competitionsGrid"></div>
-    </div>
-  </section>
-
   <section id="leadership" class="section-page">
     <div class="container">
-      <div class="section-header-pro"><span class="label">04</span><h2>Leadership</h2><div class="line"></div></div>
+      <div class="section-header-pro"><span class="label">03</span><h2>Leadership</h2><div class="line"></div></div>
       <div id="leadershipGrid"></div>
     </div>
   </section>
@@ -542,7 +534,7 @@
         return `<span class="skill-tag" ${adminClick} ${adminStyle} ${edit} onblur="data.personal.skills[${i}]=this.innerText">${esc(s)}</span>`;
       }).join('') + (editMode?`<button class="skill-tag" onclick="data.personal.skills.push('New Skill');renderAll()">+</button>`:'');
       
-      const tabList = [['production','🏢 Production'],['competition','🏅 Competition'],['academic','🎓 Academic'],['personal','💡 Personal'],['opensource','🔓 Open Source']];
+      const tabList = [['competition','🏅 Competition'],['academic','🎓 Academic'],['personal','💡 Personal']];
       document.getElementById('expTabs').innerHTML = tabList.map(([k,l])=>`
         <button onclick="currentTab='${k}';renderAll()" class="exp-tab-btn ${currentTab===k?'active':''}">
           ${l}
@@ -573,7 +565,6 @@
         document.getElementById('certsGrid').innerHTML = renderRow(data.selfDev.certs, 'selfDev.certs');
         document.getElementById('workshopsGrid').innerHTML = renderRow(data.selfDev.workshops, 'selfDev.workshops');
       }
-      document.getElementById('competitionsGrid').innerHTML = renderRow(data.awards, 'awards');
       document.getElementById('leadershipGrid').innerHTML = renderRow(data.leadership, 'leadership');
     }
 
