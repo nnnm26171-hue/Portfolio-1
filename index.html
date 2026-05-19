@@ -402,8 +402,82 @@
       target[parts[parts.length-1]] = val;
     }
     function changeImg(path) {
-      const url = prompt("Enter new image URL:");
-      if(url) { updateText(path, url); renderAll(); }
+      // Dynamic dialog offering local file upload or online URL input
+      const choice = confirm("คุณต้องการอัปโหลดรูปภาพจากเครื่องคอมพิวเตอร์ใช่หรือไม่?\n\n(กด 'ตกลง' / 'OK' เพื่อเลือกไฟล์รูปภาพจากเครื่องคอมพิวเตอร์ของคุณ)\n(กด 'ยกเลิก' / 'Cancel' เพื่อกรอกลิงก์ URL รูปภาพแทน)");
+      
+      if (choice) {
+        // Option A: Direct File Upload from computer with Auto-Compression!
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            // Create a premium loading feedback indicator
+            const loadIndicator = document.createElement('div');
+            loadIndicator.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(12,12,24,0.92); color:#fff; padding:20px 30px; border-radius:20px; font-weight:800; font-size:1.1rem; z-index:99999; box-shadow:0 20px 50px rgba(0,0,0,0.6); border:2px solid var(--primary); pointer-events:none; font-family:inherit; display:flex; align-items:center; gap:10px;";
+            loadIndicator.innerHTML = "⚡ กำลังย่อและบีบอัดรูปภาพให้ลื่นไหล...";
+            document.body.appendChild(loadIndicator);
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              const img = new Image();
+              img.onload = () => {
+                // Resize image dynamically using HTML5 Canvas to optimize performance
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                  if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                  }
+                } else {
+                  if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                  }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Export as highly optimized JPEG (75% quality balances maximum clarity & extremely tiny size!)
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                
+                updateText(path, compressedBase64);
+                renderAll();
+                
+                // Remove loader
+                if (loadIndicator.parentNode) loadIndicator.parentNode.removeChild(loadIndicator);
+              };
+              img.onerror = () => {
+                if (loadIndicator.parentNode) loadIndicator.parentNode.removeChild(loadIndicator);
+                alert("เกิดข้อผิดพลาดในการโหลดรูปภาพ กรุณาลองใหม่อีกครั้งครับ");
+              };
+              img.src = evt.target.result;
+            };
+            reader.onerror = () => {
+              if (loadIndicator.parentNode) loadIndicator.parentNode.removeChild(loadIndicator);
+              alert("เกิดข้อผิดพลาดในการอ่านไฟล์ภาพ");
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+        fileInput.click();
+      } else {
+        // Option B: Text URL input
+        const url = prompt("กรอกลิงก์รูปภาพ (Image URL) จากอินเทอร์เน็ต:");
+        if (url) {
+          updateText(path, url);
+          renderAll();
+        }
+      }
     }
 
     function renderAll() {
