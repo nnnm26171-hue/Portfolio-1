@@ -134,6 +134,8 @@ body:not(.light-mode) {
   align-items: center;
   justify-content: flex-start !important; /* Top aligned and centered */
   overflow-x: hidden;
+  contain: paint; /* Isolated rendering boundaries */
+  will-change: transform, opacity; /* Accelerates page fade in GPU */
 }
 
 #home.section-page {

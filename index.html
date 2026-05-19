@@ -367,8 +367,11 @@
     function showSection(id) { 
       document.querySelectorAll('.section-page').forEach(s => s.classList.toggle('active', s.id === id)); 
       document.querySelectorAll('.nav-links a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+id)); 
-      document.body.style.overflowY = (id === 'home') ? 'hidden' : 'auto';
-      window.scrollTo(0,0);
+      document.body.style.overflowY = 'auto'; /* Allow natural scrolling always to prevent screen height freeze bugs */
+      // Prevent Safari/Chrome layout thrashing by wrapping scroll in requestAnimationFrame
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
     }
 
     function openModal() { 
