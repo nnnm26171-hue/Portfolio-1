@@ -356,14 +356,10 @@
 
     function exitEditMode() { editMode = false; document.body.classList.remove('edit-mode-active'); document.getElementById('editBar').style.display='none'; renderAll(); }
     
-    function showSection(id) { 
-      document.querySelectorAll('.section-page').forEach(s => s.classList.toggle('active', s.id === id)); 
-      document.querySelectorAll('.nav-links a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+id)); 
-      document.body.style.overflowY = 'auto'; /* Allow natural scrolling always to prevent screen height freeze bugs */
-      // Prevent Safari/Chrome layout thrashing by wrapping scroll in requestAnimationFrame
-      requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-      });
+    function showSection(id) {
+      window.scrollTo(0, 0); /* Scroll to top FIRST before switching — prevents visible page jump */
+      document.querySelectorAll('.section-page').forEach(s => s.classList.toggle('active', s.id === id));
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
     }
 
     function openModal() { 
