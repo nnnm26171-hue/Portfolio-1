@@ -156,13 +156,7 @@ body:not(.light-mode) {
 .section-page.active {
   display: flex !important;
   opacity: 1 !important;
-  animation: fadeIn 0.18s ease-out forwards;
-}
-
-/* Opacity-only fade — no translateY to avoid full-page repaint on tab switch */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  /* Removed fadeIn animation entirely — instant display switch is smoother than animating display:none→flex */
 }
 
 /* ========== SECTION HEADER ========== */
@@ -419,18 +413,14 @@ img.hero-avatar {
   line-height: 1.1;
   margin-bottom: 1rem;
   font-weight: 900;
-  background: linear-gradient(90deg, #ffffff, #ec4899, #8b5cf6, #0ea5e9, #ffffff);
-  background-size: 200% auto;
+  background: linear-gradient(90deg, #ffffff 0%, #ec4899 35%, #8b5cf6 65%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shine-text 8s linear infinite;
-  text-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+  /* Removed shine-text animation — background-position animation is CPU-painted every frame, causes tab-switch jank */
 }
 
-@keyframes shine-text {
-  to { background-position: 200% center; }
-}
+/* @keyframes shine-text removed */
 
 body.light-mode .hero-name {
   background: linear-gradient(90deg, #1e1b4b, #db2777, #7c3aed, #0284c7, #1e1b4b) !important;
