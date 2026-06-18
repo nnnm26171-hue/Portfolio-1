@@ -21,24 +21,26 @@
   --primary-glow: rgba(139, 92, 246, 0.4);
   --cyan: #0ea5e9;
   --r: 24px;
-  --t: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  --t: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-/* ========== MILKY WAY LIGHT MODE ========== */
+/* ========== VIBRANT LIGHT MODE ========== */
 body.light-mode {
-  --bg-color: #f8fafc;
-  --bg-image: radial-gradient(circle at 12% 18%, rgba(244, 143, 177, 0.32) 0%, transparent 48%),
-              radial-gradient(circle at 88% 82%, rgba(179, 157, 219, 0.32) 0%, transparent 48%),
-              radial-gradient(circle at 50% 50%, rgba(129, 212, 250, 0.22) 0%, transparent 55%);
-  --text-color: #0f172a;
-  --text-dim: #475569;
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-color: rgba(0, 0, 0, 0.05);
-  --primary: #0ea5e9;
-  --primary-light: #38bdf8;
-  --primary-glow: rgba(14, 165, 233, 0.3);
-  --cyan: #0284c7;
+  --bg-color: #f0f4ff;
+  --bg-image:
+    radial-gradient(circle at 10% 20%, rgba(217, 70, 239, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.28) 0%, transparent 45%),
+    radial-gradient(circle at 55% 55%, rgba(16, 185, 129, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 75% 15%, rgba(245, 158, 11, 0.18) 0%, transparent 40%);
+  --text-color: #1e1b4b;
+  --text-dim: #4b5563;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --border: rgba(139, 92, 246, 0.15);
+  --border-color: rgba(139, 92, 246, 0.12);
+  --primary: #7c3aed;
+  --primary-light: #a78bfa;
+  --primary-glow: rgba(124, 58, 237, 0.35);
+  --cyan: #0891b2;
 }
 
 /* ========== RESET ========== */
@@ -48,14 +50,16 @@ body.light-mode {
 body {
   background-color: var(--bg-color);
   background-image: var(--bg-image);
-  background-attachment: fixed;
+  /* Removed background-attachment:fixed — causes full repaint on every scroll & tab switch in Chrome/Safari on desktop */
   background-size: cover;
+  background-position: center;
   color: var(--text-color);
   font-family: 'Plus Jakarta Sans', 'Prompt', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.6;
   overflow-x: hidden;
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 
 /* Dark mode body force */
 body:not(.light-mode) {
@@ -90,12 +94,11 @@ body:not(.light-mode) {
   background: #fff;
   opacity: 0;
   animation: twinkle var(--d, 3s) ease-in-out infinite;
-  transform: translate3d(0, 0, 0); /* Forces GPU layer caching */
-  will-change: opacity; /* Eliminates continuous subpixel repaint stress */
+  /* Removed will-change & translate3d — 45 separate GPU layers caused major stutter */
 }
 @keyframes twinkle {
   0%, 100% { opacity: 0; }
-  50%       { opacity: 0.9; }
+  50%       { opacity: 0.8; }
 }
 
 /* ========== SHOOTING STARS ========== */
@@ -132,15 +135,14 @@ body:not(.light-mode) {
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start !important; /* Top aligned and centered */
+  justify-content: flex-start !important;
   overflow-x: hidden;
-  contain: paint; /* Isolated rendering boundaries */
-  will-change: transform, opacity; /* Accelerates page fade in GPU */
+  /* Removed will-change — holding all inactive sections in GPU memory caused stutter */
 }
 
 #home.section-page {
-  justify-content: flex-start !important; /* Consistent top alignment across all section pages */
-  padding-top: 145px !important; /* Beautiful spacious gap below the floating navbar, avoiding any overlap */
+  justify-content: flex-start !important;
+  padding-top: 145px !important;
 }
 
 .section-page .container {
@@ -154,12 +156,13 @@ body:not(.light-mode) {
 .section-page.active {
   display: flex !important;
   opacity: 1 !important;
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.18s ease-out forwards;
 }
 
+/* Opacity-only fade — no translateY to avoid full-page repaint on tab switch */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ========== SECTION HEADER ========== */
@@ -210,8 +213,7 @@ body:not(.light-mode) {
   min-width: 320px;
   height: 60px;
   padding: 0.5rem;
-  background: rgba(10, 10, 20, 0.7);
-  backdrop-filter: blur(25px) saturate(200%);
+  background: rgba(10, 10, 22, 0.92); /* Solid bg — removed backdrop-filter:blur which caused scroll repaint every frame */
   border: 1px solid var(--border);
   border-radius: 100px;
   display: flex;
@@ -249,7 +251,13 @@ body.light-mode .navbar {
 
 body.light-mode .nav-links a:hover {
   color: var(--primary) !important;
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(124, 58, 237, 0.08) !important;
+}
+
+body.light-mode .nav-links a.active {
+  background: linear-gradient(135deg, #7c3aed, #0891b2) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 15px rgba(124, 58, 237, 0.40) !important;
 }
 
 /* ========== HERO CARD ========== */
@@ -285,11 +293,14 @@ body.light-mode .nav-links a:hover {
 }
 
 body.light-mode .hero-card-premium {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 143, 177, 0.04), rgba(129, 212, 250, 0.04)) !important;
-  border: 2px solid rgba(179, 157, 219, 0.45) !important;
-  box-shadow: 
-    0 30px 70px rgba(179, 157, 219, 0.25),
-    0 0 50px rgba(244, 143, 177, 0.2) !important;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(233, 213, 255, 0.40) 40%,
+    rgba(186, 230, 253, 0.35) 100%) !important;
+  border: 2px solid rgba(139, 92, 246, 0.40) !important;
+  box-shadow:
+    0 30px 70px rgba(124, 58, 237, 0.18),
+    0 0 60px rgba(217, 70, 239, 0.12) !important;
 }
 
 .hero-card-premium:hover {
@@ -301,10 +312,10 @@ body.light-mode .hero-card-premium {
 }
 
 body.light-mode .hero-card-premium:hover {
-  border-color: rgba(179, 157, 219, 0.85) !important;
-  box-shadow: 
-    0 35px 80px rgba(179, 157, 219, 0.35),
-    0 0 70px rgba(244, 143, 177, 0.35) !important;
+  border-color: rgba(124, 58, 237, 0.7) !important;
+  box-shadow:
+    0 35px 80px rgba(124, 58, 237, 0.28),
+    0 0 80px rgba(217, 70, 239, 0.22) !important;
 }
 
 .hero-card-premium > div:last-child {
@@ -337,10 +348,9 @@ body.light-mode .hero-card-premium:hover {
   position: absolute;
   inset: -12px;
   background: linear-gradient(135deg, #ec4899, #8b5cf6, #0ea5e9);
-  border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; /* Beautiful organic fixed plasma shape */
-  opacity: 0.6;
-  filter: blur(10px);
-  transform: translate3d(0, 0, 0); /* Forces GPU hardware acceleration */
+  border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+  opacity: 0.55;
+  /* Removed filter:blur(10px) — static blur on pseudo-elements causes repaint when scrolling */
 }
 
 body.light-mode .hero-avatar-wrapper::before {
@@ -370,9 +380,9 @@ body.light-mode .hero-avatar-wrapper::after {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #ffffff; /* Clean white background to blend seamlessly with the portrait */
+  background: #ffffff;
   box-shadow: 0 10px 30px var(--primary-glow);
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,7 +391,7 @@ body.light-mode .hero-avatar-wrapper::after {
   color: #fff;
   z-index: 2;
   position: relative;
-  object-fit: cover; /* Fit completely and fill the circular frame */
+  object-fit: cover;
   border: 4px solid #080810;
 }
 
@@ -492,13 +502,14 @@ body.light-mode .hero-name {
   font-size: 0.85rem;
   font-weight: 700;
   color: #ffffff !important;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 body.light-mode .skill-tag {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1.5px solid rgba(179, 157, 219, 0.45) !important;
-  color: #1e1b4b !important;
-  box-shadow: 0 4px 15px rgba(179, 157, 219, 0.15);
+  background: linear-gradient(135deg, rgba(233, 213, 255, 0.85), rgba(186, 230, 253, 0.70)) !important;
+  border: 1.5px solid rgba(124, 58, 237, 0.35) !important;
+  color: #5b21b6 !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.15);
+  font-weight: 800 !important;
 }
 .skill-tag:hover {
   transform: translateY(-4px) scale(1.02) !important; /* Elegant floating lift without overlap */
@@ -722,7 +733,7 @@ body.light-mode .item-row-card * {
   border: 1px solid var(--border-color);
   border-radius: 30px;
   padding: 2rem;
-  backdrop-filter: blur(10px);
+  /* Removed backdrop-filter:blur — causes repaint on scroll */
 }
 
 /* ========== MODAL ========== */
@@ -883,10 +894,10 @@ body.light-mode .section-header-pro h2 {
 }
 
 body.light-mode #heroTitle {
-  background: rgba(14, 165, 233, 0.08) !important;
-  border: 1px solid rgba(14, 165, 233, 0.2) !important;
-  color: #0284c7 !important;
-  box-shadow: none !important;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.10), rgba(6, 182, 212, 0.08)) !important;
+  border: 1px solid rgba(124, 58, 237, 0.30) !important;
+  color: #7c3aed !important;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.10) !important;
 }
 
 #heroUni {
@@ -898,7 +909,8 @@ body.light-mode #heroTitle {
 }
 
 body.light-mode #heroUni {
-  color: #475569 !important;
+  color: #6d28d9 !important;
+  font-weight: 700 !important;
 }
 
 #heroBio {
@@ -912,48 +924,77 @@ body.light-mode #heroUni {
 }
 
 body.light-mode #heroBio {
-  color: #334155 !important;
+  color: #374151 !important;
 }
 
-/* Floating Cosmic Nebulas in Dark Mode */
+/* Floating Cosmic Nebulas — Zero blur filter to eliminate repaint overhead */
 .cosmic-nebula {
   position: fixed;
   border-radius: 50%;
-  filter: blur(90px); /* Highly optimized blur size to decrease layout computation stress */
+  /* Removed filter:blur(90px) — replaced with soft multi-stop gradient fade for same effect, zero CPU cost */
   z-index: 0;
   pointer-events: none;
-  opacity: 0.18;
-  transform: translate3d(0, 0, 0); /* Forces GPU hardware rendering */
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
 }
 
 body.light-mode .cosmic-nebula {
-  opacity: 0.12 !important; /* Soft, dreamy drifting pastel nebulas behind the card in Light Mode */
+  opacity: 1 !important;
 }
 
 .nebula-purple {
-  top: 10%; left: 15%;
-  width: 450px; height: 450px;
-  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  top: 5%; left: 10%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle at center,
+    rgba(139, 92, 246, 0.22) 0%,
+    rgba(139, 92, 246, 0.10) 35%,
+    rgba(139, 92, 246, 0.03) 60%,
+    transparent 75%);
 }
 
 .nebula-cyan {
-  bottom: 15%; right: 10%;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, #0ea5e9 0%, transparent 70%);
-  animation-delay: -6s;
+  bottom: 10%; right: 5%;
+  width: 650px; height: 650px;
+  background: radial-gradient(circle at center,
+    rgba(14, 165, 233, 0.18) 0%,
+    rgba(14, 165, 233, 0.08) 35%,
+    rgba(14, 165, 233, 0.02) 60%,
+    transparent 75%);
 }
 
 .nebula-pink {
-  top: 35%; right: 25%;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, #ec4899 0%, transparent 70%);
-  animation-delay: -12s;
+  top: 30%; right: 20%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle at center,
+    rgba(236, 72, 153, 0.14) 0%,
+    rgba(236, 72, 153, 0.06) 35%,
+    rgba(236, 72, 153, 0.01) 60%,
+    transparent 75%);
 }
 
-@keyframes drift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(60px, 40px, 0) scale(1.2); }
+body.light-mode .nebula-purple {
+  background: radial-gradient(circle at center,
+    rgba(167, 139, 250, 0.30) 0%,
+    rgba(167, 139, 250, 0.14) 35%,
+    rgba(167, 139, 250, 0.04) 60%,
+    transparent 75%);
+}
+
+body.light-mode .nebula-cyan {
+  background: radial-gradient(circle at center,
+    rgba(6, 182, 212, 0.28) 0%,
+    rgba(6, 182, 212, 0.12) 35%,
+    rgba(6, 182, 212, 0.03) 60%,
+    transparent 75%);
+}
+
+body.light-mode .nebula-pink {
+  background: radial-gradient(circle at center,
+    rgba(217, 70, 239, 0.25) 0%,
+    rgba(217, 70, 239, 0.10) 35%,
+    rgba(217, 70, 239, 0.02) 60%,
+    transparent 75%);
 }
 
 /* ========== RESPONSIVE ========== */
@@ -1002,15 +1043,16 @@ body.light-mode ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
   padding: 0.8rem 1.8rem;
   border-radius: 100px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(20, 20, 35, 0.4);
+  background: rgba(20, 20, 35, 0.6);
   color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+  /* Removed backdrop-filter:blur — expensive on multiple elements during scroll */
   cursor: pointer;
   font-weight: 700;
   font-size: 0.85rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
   opacity: 0.8;
   outline: none;
+  /* Removed backdrop-filter:blur(10px) — expensive blur on multiple tab buttons causes scroll stutter */
 }
 
 .exp-tab-btn:hover {
